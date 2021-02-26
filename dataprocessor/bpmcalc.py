@@ -102,7 +102,7 @@ class BPMCalc:
 
         # initial guess -- amplitude 10, 60bpm (6.28 rad/sec), phase shift 1 rad, 0 vertical offset
         p0 = [10, 6.28, 1, 0]
-        popt, _ = curve_fit(sinfunc, time[2: -2], self.acceleration_data[2: -2], p0=p0)
+        popt, _ = curve_fit(sinfunc, time[2: -2], self.velocity_data[2: -2], p0=p0)
         return bpm_from_ang_freq(popt[1])
 
     def process_data(self, time, smoothed_data):
@@ -112,7 +112,7 @@ class BPMCalc:
         self.velocity_data = clean_data(head_velocity)
 
     def send_data(self, time, coord):
-        if len(self.time) == 0 or time and coord and self.time[-1] != time:
+        if time and coord and (len(self.time) == 0 or self.time[-1] != time):
             self.data.append(coord)
             self.time.append(time)
 
