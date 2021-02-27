@@ -12,13 +12,13 @@ class WebCam:
     self._video_capture = cv2.VideoCapture(device_index)
     _, self._frame = self._video_capture.read()
     self._stop = False
-  
+
   def start(self):
     Thread(target=self._update, args=()).start()
 
   def get_frame(self):
     return self._frame
-  
+
   def stop(self):
     self._stop = True
 
@@ -56,20 +56,20 @@ if __name__ == '__main__':
             else:
                 start_time = time.time()
                 curr_time = calc_time = 0
-            print(curr_time)
-            
-            # data_collector.add(curr_time, (x, y))
-            # bpm_calc.send_data(curr_time, (x, y))
+            # print(curr_time)
 
-            # if(curr_time - calc_time > 2):
-            #     bpm = bpm_calc.calculate_bpm()
-            #     print(bpm)
-            #     calc_time = curr_time
+            data_collector.add(curr_time, (x, y))
+            bpm_calc.send_data(curr_time, (x, y))
+
+            if(curr_time - calc_time > 2):
+                bpm = bpm_calc.calculate_bpm()
+                print(bpm, "\tcalculation took ", (time.time() - curr_time - start_time), " seconds")
+                calc_time = curr_time
 
         cv2.imshow('Video', frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            data_collector.write()
+            # data_collector.write()
             break
 
     webcam.stop()

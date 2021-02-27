@@ -1,1 +1,3 @@
-from dataprocessor.smoothing.basesmoother import BaseSmoother
+from dataprocessor.smoothing.base_smoother import BaseSmoother
+from dataprocessor.smoothing.double_exponential import DoubleExponential
+from dataprocessor.smoothing.moving_average import MovingAverage
