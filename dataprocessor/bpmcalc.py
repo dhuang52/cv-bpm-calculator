@@ -18,6 +18,11 @@ class BPMCalc:
         self.minimum_points = 10
         self.maximum_points = 5000
         self.fit = None
+    
+    def reset(self):
+        self.data = []
+        self.time = []
+        self.fit = None
 
     def send_data(self, time, coord):
         if len(self.time) == 0 or self.time[-1] != time:
