@@ -12,13 +12,13 @@ class WebCam:
     self._video_capture = cv2.VideoCapture(device_index)
     _, self._frame = self._video_capture.read()
     self._stop = False
-
+  
   def start(self):
     Thread(target=self._update, args=()).start()
 
   def get_frame(self):
     return self._frame
-
+  
   def stop(self):
     self._stop = True
 
