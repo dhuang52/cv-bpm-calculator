@@ -53,21 +53,28 @@ class BPMCalc:
         p0 = [50, 2 * np.pi * 116 / 60, 1, 0] if self.fit is None else self.fit[0]
 
         for sample in samples:
-            try:
-                # fit both velocity along bop axis or y velocity, whichever is best
-                processed_data = (self.process_data(*sample), clean_data(derivative(*sample)[:, 1]))
-                popt, pcov = [None]*2, [None]*2
-                for i in range(len(processed_data)):
-                    popt[i], pcov[i] = curve_fit(sinfunc, sample[0][1: -1],
-                                             self.smoother.smooth(processed_data[i])[1: -1], p0=p0)
-                # minimize error in frequency parameter
-                min_index = 0 if np.diag(pcov[1] - pcov[0])[1] > 0 else 1
-                if not optimum_sample or np.diag(pcov[min_index])[1] < optimum_sample[1]:
-                    optimum_sample = (popt[min_index], sum(np.diag(pcov[min_index])), sample[0], processed_data[min_index])
-            except RuntimeError:  # raised when optimum fit parameters aren't found
-                pass
+            sample_fit = self.find_fit(sample, p0)
+            if not optimum_sample or sample_fit[1] < optimum_sample[1]:
+                optimum_sample = sample_fit
 
         return optimum_sample
+
+    def find_fit(self, sample, p0):
+        try:
+            # fit both velocity along bop axis or y velocity, whichever is best
+            processed_data = (self.process_data(*sample), clean_data(derivative(*sample)[:, 1]))
+            popt, pcov = [None] * 2, [None] * 2
+            for i, data in enumerate(processed_data):
+                popt[i], pcov[i] = curve_fit(sinfunc, sample[0][1: -1],
+                                             self.smoother.smooth(data)[1: -1], p0=p0)
+            # minimize error in frequency parameter
+            min_index = 0 if np.diag(pcov[1] - pcov[0])[1] > 0 else 1
+            return popt[min_index], sum(np.diag(pcov[min_index])), sample[0], processed_data[min_index]
+        except RuntimeError:  # raised when optimum fit parameters aren't found
+            pass
+
+    def set_frequency(self, frequency):
+        self.fit[0][1] = 2 * np.pi * frequency
 
     def process_data(self, time, data):
         head_velocity = derivative(time, data)
@@ -78,7 +85,7 @@ class BPMCalc:
     @staticmethod
     def project_velocities(data, direction):
         elt_wise_product = data * direction
-        dots = np.array([sum(elt_wise_product[i]) for i in range(len(elt_wise_product))])
+        dots = np.array([sum(product) for product in elt_wise_product])
         projections = dots / np.linalg.norm(direction)
         return projections
 
@@ -99,3 +106,5 @@ class BPMCalc:
     def bpm_from_ang_freq(angular_frequency):
         freq = np.abs(angular_frequency) / (2 * np.pi)
         return freq * 60
+
+
