@@ -70,8 +70,12 @@ if __name__ == '__main__':
           cv2.putText(frame, f'Estimating bpm...', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
         cv2.imshow('Video', frame)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
             break
+        elif key == ord('r'):
+          bpm_calc.reset()
+          bpm = None
 
     webcam.stop()
     cv2.destroyAllWindows()
