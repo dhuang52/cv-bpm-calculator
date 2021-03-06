@@ -5,7 +5,10 @@ from dataprocessor.math_utils import *
 import numpy as np
 from scipy.optimize import curve_fit
 import random
+from collections import namedtuple
 
+
+Fit = namedtuple('Fit', ['params', 'error', 'time', 'data'])
 
 class BPMCalc:
 
@@ -37,7 +40,11 @@ class BPMCalc:
             self.time = self.time[-self.maximum_points:]
             self.data = self.data[-self.maximum_points:]
 
-        self.fit = self.optimum_fit(self.time, self.data)
+        new_fit = self.optimum_fit(self.time, self.data)
+        # only change fit if error on the frequency parmeter improves
+        if not self.fit or new_fit.error < self.fit.error:
+            self.fit = new_fit
+
         return self.bpm_from_ang_freq(self.fit[0][1])
 
     def optimum_fit(self, time, data):
@@ -59,7 +66,7 @@ class BPMCalc:
 
         for sample in samples:
             sample_fit = self.find_fit(sample, p0)
-            if not optimum_sample or (sample_fit and sample_fit[1] < optimum_sample[1]):
+            if not optimum_sample or (sample_fit and sample_fit.error < optimum_sample.error):
                 optimum_sample = sample_fit
 
         return optimum_sample
@@ -74,7 +81,7 @@ class BPMCalc:
                                              self.smoother.smooth(data)[1: -1], p0=p0)
             # minimize error in frequency parameter
             min_index = 0 if np.diag(pcov[1] - pcov[0])[1] > 0 else 1
-            return popt[min_index], sum(np.diag(pcov[min_index])), sample[0], processed_data[min_index]
+            return Fit(popt[min_index], sum(np.diag(pcov[min_index])), sample[0], processed_data[min_index])
         except RuntimeError:  # raised when optimum fit parameters aren't found
             pass
 
