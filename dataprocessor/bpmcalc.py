@@ -54,7 +54,7 @@ class BPMCalc:
 
         for sample in samples:
             sample_fit = self.find_fit(sample, p0)
-            if not optimum_sample or sample_fit[1] < optimum_sample[1]:
+            if not optimum_sample or (sample_fit and sample_fit[1] < optimum_sample[1]):
                 optimum_sample = sample_fit
 
         return optimum_sample
