@@ -12,7 +12,7 @@ if __name__ == '__main__':
     time = None
     data = None
 
-    with open('test_position_data.npy', 'rb') as f:
+    with open('testdata/test_position_data.npy', 'rb') as f:
         time = np.load(f)
         data = np.load(f)
 

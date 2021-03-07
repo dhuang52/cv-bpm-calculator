@@ -29,7 +29,7 @@ class WebCam:
 
 
 if __name__ == '__main__':
-    face_cascade = cv2.CascadeClassifier('lbpcascade_frontalface_improved.xml')
+    face_cascade = cv2.CascadeClassifier('cascades/lbpcascade_frontalface_improved.xml')
     video_capture = cv2.VideoCapture(0)
     webcam = WebCam(0)
     webcam.start()

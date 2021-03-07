@@ -1,14 +1,15 @@
-from dataprocessor.smoothing import BaseSmoother
-from dataprocessor.smoothing import DoubleExponential
-from dataprocessor.math_utils import *
-
-import numpy as np
-from scipy.optimize import curve_fit
 import random
 from collections import namedtuple
 
+import numpy as np
+from scipy.optimize import curve_fit
+
+from dataprocessor.math_utils import *
+from dataprocessor.smoothing import BaseSmoother
+from dataprocessor.smoothing import DoubleExponential
 
 Fit = namedtuple('Fit', ['params', 'error', 'time', 'data'])
+
 
 class BPMCalc:
 
@@ -21,7 +22,7 @@ class BPMCalc:
         self.minimum_points = 10
         self.maximum_points = 5000
         self.fit = None
-    
+
     def reset(self):
         self.data = []
         self.time = []
@@ -65,6 +66,7 @@ class BPMCalc:
         p0 = [50, 2 * np.pi * 116 / 60, 1, 0] if self.fit is None else self.fit[0]
 
         for sample in samples:
+            sample[1] = self.smoother.smooth(sample[1])
             sample_fit = self.find_fit(sample, p0)
             if not optimum_sample or (sample_fit and sample_fit.error < optimum_sample.error):
                 optimum_sample = sample_fit
@@ -74,21 +76,21 @@ class BPMCalc:
     def find_fit(self, sample, p0):
         try:
             # fit both velocity along bop axis or y velocity, whichever is best
-            processed_data = (self.process_data(*sample), clean_data(derivative(*sample)[:, 1]))
+            velocity_data = (self.bop_vector_velocity(*sample), clean_data(derivative(*sample)[:, 1]))
             popt, pcov = [None] * 2, [None] * 2
-            for i, data in enumerate(processed_data):
+            for i, data in enumerate(velocity_data):
                 popt[i], pcov[i] = curve_fit(sinfunc, sample[0][1: -1],
                                              self.smoother.smooth(data)[1: -1], p0=p0)
             # minimize error in frequency parameter
             min_index = 0 if np.diag(pcov[1] - pcov[0])[1] > 0 else 1
-            return Fit(popt[min_index], sum(np.diag(pcov[min_index])), sample[0], processed_data[min_index])
+            return Fit(popt[min_index], np.diag(pcov[min_index])[1], sample[0], velocity_data[min_index])
         except RuntimeError:  # raised when optimum fit parameters aren't found
             pass
 
     def set_frequency(self, frequency):
         self.fit[0][1] = 2 * np.pi * frequency
 
-    def process_data(self, time, data):
+    def bop_vector_velocity(self, time, data):
         head_velocity = derivative(time, data)
         bop_vector = self.lsrl_vector(data)
         head_velocity = self.project_velocities(head_velocity, bop_vector)
@@ -105,7 +107,7 @@ class BPMCalc:
     def generate_samples(time, data, num_chunks, chunk_length=50):
         for _ in range(num_chunks):
             i = random.randint(0, len(data) - chunk_length)
-            yield (np.array(time[i: i + chunk_length]), np.array([*data[i: i + chunk_length]]))
+            yield [np.array(time[i: i + chunk_length]), np.array([*data[i: i + chunk_length]])]
 
     @staticmethod
     def lsrl_vector(data):
@@ -118,5 +120,3 @@ class BPMCalc:
     def bpm_from_ang_freq(angular_frequency):
         freq = np.abs(angular_frequency) / (2 * np.pi)
         return freq * 60
-
-
