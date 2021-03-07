@@ -41,18 +41,30 @@ if __name__ == '__main__':
     plt.legend()
     plt.show()
 
-    plt.plot(time, data, label='raw position data')
-    plt.legend()
+    label = ['Raw x values', 'Raw y values']
+    plot = plt.plot(time, data)
+    plt.legend(plot, label)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Position')
     plt.show()
 
-    plt.plot(time, smoother.smooth(data), label='smoothed position data')
-    plt.legend()
+    label = ['Smoothed x values', 'Smoothed y values']
+    plot = plt.plot(time, smoother.smooth(data))
+    plt.legend(plot, label)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Position')
     plt.show()
 
-    plt.plot(time, derivative(time, data), label='raw velocity data')
-    plt.legend()
+    label = ['Raw x velocity', 'Raw y velocity']
+    plot = plt.plot(time, derivative(time, data))
+    plt.legend(plot, label)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Velocity')
     plt.show()
 
-    plt.plot(time, smoother.smooth(derivative(time, data)), label='smoothed raw velocity data')
-    plt.legend()
+    label = ['Smoothed x velocity', 'Smoothed y velocity']
+    plt.plot(time, smoother.smooth(derivative(time, data)))
+    plt.legend(plot, label)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Velocity')
     plt.show()

@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
             bpm_calc.send_data(curr_time, (x, y))
 
-            if(curr_time - calc_time > 2):
+            if curr_time - calc_time > 2:
                 bpm = bpm_calc.calculate_bpm()
                 # print(bpm, "\tcalculation took ", (time.time() - curr_time - start_time), " seconds")
                 calc_time = curr_time
