@@ -6,12 +6,6 @@ def one_sided_derivative(time, data):
     return (data[1] - data[0]) / (time[1] - time[0])
 
 
-def derivative_helper(time, data):
-    # converges to centered differences when h1 = h2
-    derivs = [one_sided_derivative(time[i: i + 2], data[i: i + 2]) for i in range(len(time) - 1)]
-    return np.average(derivs)
-
-
 def derivative(time, data):
     one_sided_derivs = [one_sided_derivative(time[i:i + 2], data[i:i + 2]) for i in range(len(time) - 1)]
     deriv = np.zeros_like(data)

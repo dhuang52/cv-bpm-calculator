@@ -1,6 +1,5 @@
 import cv2, time
 
-from datacollector import DataCollector
 from dataprocessor.bpmcalc import BPMCalc
 from threading import Thread
 
@@ -30,7 +29,7 @@ class WebCam:
 
 
 if __name__ == '__main__':
-    face_cascade = cv2.CascadeClassifier('lbpcascade_frontalface_improved.xml')
+    face_cascade = cv2.CascadeClassifier('cascades/lbpcascade_frontalface_improved.xml')
     video_capture = cv2.VideoCapture(0)
     webcam = WebCam(0)
     webcam.start()
@@ -38,7 +37,6 @@ if __name__ == '__main__':
     start_time = None
     calc_time = None
     bpm = None
-    data_collector = DataCollector()
     bpm_calc = BPMCalc()
 
     while True:
@@ -56,10 +54,9 @@ if __name__ == '__main__':
                 start_time = time.time()
                 curr_time = calc_time = 0
 
-            data_collector.add(curr_time, (x, y))
             bpm_calc.send_data(curr_time, (x, y))
 
-            if(curr_time - calc_time > 2):
+            if curr_time - calc_time > 2:
                 bpm = bpm_calc.calculate_bpm()
                 # print(bpm, "\tcalculation took ", (time.time() - curr_time - start_time), " seconds")
                 calc_time = curr_time
