@@ -17,9 +17,14 @@ On Windows run:
 \Scripts\activate.bat
 ```
 
-Install depdnencies:
+Install dependencies:
 ```
 python3 -m pip install -r requirements.txt
+```
+
+Run the program:
+```
+python3 face_detection.py 
 ```
 
 ## Method
